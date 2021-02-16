@@ -1,3 +1,7 @@
+/rio
+*.png
+*.ppm
+
 # Prerequisites
 *.d
 
