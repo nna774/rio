@@ -1,3 +1,5 @@
+#include <omp.h>
+
 #include <iostream>
 #include <optional>
 
@@ -35,7 +37,7 @@ Color ray_color(const Ray& r, const Hittable& world) {
 int main() {
   // Image
   const auto aspect_ratio = 16.0 / 9.0;
-  const int image_width = 400;
+  const int image_width = 1000;
   const int image_height = static_cast<int>(image_width / aspect_ratio);
   const int samples_per_pixel = 100;
 
@@ -53,12 +55,15 @@ int main() {
     std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
     for (int i = 0; i < image_width; ++i) {
       Color pixel_color(0, 0, 0);
+      std::array<Color, samples_per_pixel> arr;
+#pragma omp parallel for
       for (int s = 0; s < samples_per_pixel; ++s) {
         auto u = (i + random_float()) / (image_width - 1);
         auto v = (j + random_float()) / (image_height - 1);
         Ray r = camera.get_ray(u, v);
-        pixel_color += ray_color(r, world);
+        arr[s] = ray_color(r, world);
       }
+      pixel_color = std::accumulate(begin(arr), end(arr), Color{});
       write_color(std::cout, pixel_color, samples_per_pixel);
     }
   }
