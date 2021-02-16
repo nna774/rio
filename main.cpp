@@ -6,6 +6,8 @@
 #include "camera.hpp"
 #include "color.hpp"
 #include "hittable_list.hpp"
+#include "lambertian.hpp"
+#include "metal.hpp"
 #include "ray.hpp"
 #include "sphere.hpp"
 #include "utils.hpp"
@@ -28,8 +30,11 @@ Color ray_color(const Ray& r, const Hittable& world, int depth) {
   if (depth <= 0) return Color(0, 0, 0);
   HitRecord rec;
   if (world.hit(r, 0.001, infinity, rec)) {
-    Point3 target = rec.p + rec.normal + random_unit_vector();
-    return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1);
+    Ray scattered;
+    Color attenuation;
+    if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+      return attenuation * ray_color(scattered, world, depth - 1);
+    return Color(0, 0, 0);
   }
   Vec3 unit_direction = unit_vector(r.direction());
   auto t2 = 0.5 * (unit_direction.y() + 1.0);
@@ -39,15 +44,23 @@ Color ray_color(const Ray& r, const Hittable& world, int depth) {
 int main() {
   // Image
   const auto aspect_ratio = 16.0 / 9.0;
-  const int image_width = 1000;
+  const int image_width = 4000;
   const int image_height = static_cast<int>(image_width / aspect_ratio);
   const int samples_per_pixel = 100;
   const int max_depth = 50;
 
   // World
   HittableList world;
-  world.add(std::make_shared<Sphere>(Point3(0, 0, -1), 0.5));
-  world.add(std::make_shared<Sphere>(Point3(0, -100.5, -1), 90));
+  auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
+  auto material_center = std::make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
+  auto material_left = std::make_shared<Metal>(Color(0.8, 0.8, 0.8));
+  auto material_right = std::make_shared<Metal>(Color(0.8, 0.6, 0.2));
+
+  world.add(
+      std::make_shared<Sphere>(Point3(0.0, -100.5, -1.0), 100.0, material_ground));
+  world.add(std::make_shared<Sphere>(Point3(0.0, 0.0, -1.0), 0.5, material_center));
+  world.add(std::make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), 0.5, material_left));
+  world.add(std::make_shared<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
 
   // Camera
   Camera camera;

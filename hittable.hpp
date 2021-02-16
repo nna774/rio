@@ -1,12 +1,16 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
+#include <memory>
+
 #include "ray.hpp"
+#include "material.hpp"
 
 struct HitRecord {
   Point3 p;
   Vec3 normal;
   Float t;
+  std::shared_ptr<Material> mat_ptr;
   bool front_face;
 
   inline void set_face_normal(const Ray& r, const Vec3& outward_normal) {

@@ -42,7 +42,13 @@ class Vec3_impl {
   }
   inline static Vec3_impl random(Float min, Float max) {
     return Vec3_impl(random_float(min, max), random_float(min, max),
-                random_float(min, max));
+                     random_float(min, max));
+  }
+  bool near_zero() const {
+    // Return true if the vector is close to zero in all dimensions.
+    const auto s = 1e-8;
+    return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) &&
+           (std::fabs(e[2]) < s);
   }
 
  public:
@@ -104,12 +110,27 @@ Vec3_impl<T> random_in_unit_sphere_impl() {
 }
 template <class T>
 Vec3_impl<T> random_unit_vector_impl() {
-    return unit_vector(random_in_unit_sphere_impl<T>());
+  return unit_vector(random_in_unit_sphere_impl<T>());
+}
+template <class T>
+Vec3_impl<T> random_in_hemisphere_impl(const Vec3_impl<T> &normal) {
+  Vec3_impl<T> in_unit_sphere = random_in_unit_sphere_impl<T>();
+  if (dot(in_unit_sphere, normal) > 0.0) {
+    // In the same hemisphere as the normal
+    return in_unit_sphere;
+  }
+  return -in_unit_sphere;
+}
+template <class T>
+Vec3_impl<T> reflect_impl(const Vec3_impl<T> &v, const Vec3_impl<T> &n) {
+  return v - 2 * dot(v, n) * n;
 }
 
 using Vec3 = Vec3_impl<Float>;
 auto random_in_unit_sphere = random_in_unit_sphere_impl<Float>;
 auto random_unit_vector = random_unit_vector_impl<Float>;
+auto random_in_hemisphere = random_in_hemisphere_impl<Float>;
+auto reflect = reflect_impl<Float>;
 
 // Type aliases for Vec3
 using Point3 = Vec3;  // 3D point
