@@ -32,8 +32,8 @@ int main() {
   for (int j = image_height - 1; j >= 0; --j) {
     std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
     for (int i = 0; i < image_width; ++i) {
-      auto u = double(i) / (image_width - 1);
-      auto v = double(j) / (image_height - 1);
+      auto u = Float(i) / (image_width - 1);
+      auto v = Float(j) / (image_height - 1);
       Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
       Color pixel_color = ray_color(r);
       write_color(std::cout, pixel_color);

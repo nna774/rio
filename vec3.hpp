@@ -84,7 +84,8 @@ inline Vec3_impl<T> unit_vector(Vec3_impl<T> v) {
   return v / v.length();
 }
 
-using Vec3 = Vec3_impl<double>;
+using Float = double;
+using Vec3 = Vec3_impl<Float>;
 
 // Type aliases for Vec3
 using Point3 = Vec3;  // 3D point
