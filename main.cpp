@@ -1,9 +1,16 @@
 #include <iostream>
+#include <numbers>
 #include <optional>
 
 #include "color.hpp"
+#include "hittable_list.hpp"
+#include "sphere.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
+
+const Float infinity = std::numeric_limits<Float>::infinity();
+const Float pi = std::numbers::pi_v<Float>;
+inline Float degrees_to_radians(Float degrees) { return degrees * pi / 180.0; }
 
 std::optional<Float> hit_sphere(const Point3& center, Float radius,
                                 const Ray& r) {
@@ -18,11 +25,10 @@ std::optional<Float> hit_sphere(const Point3& center, Float radius,
   return (-harf_b - std::sqrt(discriminant)) / a;
 }
 
-Color ray_color(const Ray& r) {
-  auto t = hit_sphere(Point3(0, 0, -1), 0.5, r);
-  if (t) {
-    Vec3 N = unit_vector(r.at(*t) - Vec3(0, 0, -1));
-    return 0.5 * Color(N.x() + 1, N.y() + 1, N.z() + 1);
+Color ray_color(const Ray& r, const Hittable& world) {
+  HitRecord rec;
+  if (world.hit(r, 0, infinity, rec)) {
+    return 0.5 * (rec.normal + Color(1, 1, 1));
   }
   Vec3 unit_direction = unit_vector(r.direction());
   auto t2 = 0.5 * (unit_direction.y() + 1.0);
@@ -34,6 +40,11 @@ int main() {
   const auto aspect_ratio = 16.0 / 9.0;
   const int image_width = 4000;
   const int image_height = static_cast<int>(image_width / aspect_ratio);
+
+  // World
+  HittableList world;
+  world.add(std::make_shared<Sphere>(Point3(0, 0, -1), 0.5));
+  world.add(std::make_shared<Sphere>(Point3(0, -100.5, -1), 100));
 
   // Camera
   auto viewport_height = 2.0;
@@ -54,7 +65,7 @@ int main() {
       auto u = Float(i) / (image_width - 1);
       auto v = Float(j) / (image_height - 1);
       Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-      Color pixel_color = ray_color(r);
+      Color pixel_color = ray_color(r, world);
       write_color(std::cout, pixel_color);
     }
   }
