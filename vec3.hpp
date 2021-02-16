@@ -46,19 +46,19 @@ inline std::ostream &operator<<(std::ostream &out, const Vec3_impl<T> &v) {
 
 template <class T>
 inline Vec3_impl<T> operator+(const Vec3_impl<T> &u, const Vec3_impl<T> &v) {
-  return vec3(u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]);
+  return Vec3_impl<T>(u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]);
 }
 template <class T>
 inline Vec3_impl<T> operator-(const Vec3_impl<T> &u, const Vec3_impl<T> &v) {
-  return vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
+  return Vec3_impl<T>(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
 }
 template <class T>
 inline Vec3_impl<T> operator*(const Vec3_impl<T> &u, const Vec3_impl<T> &v) {
-  return vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
+  return Vec3_impl<T>(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
 }
 template <class T>
 inline Vec3_impl<T> operator*(double t, const Vec3_impl<T> &v) {
-  return vec3(t * v.e[0], t * v.e[1], t * v.e[2]);
+  return Vec3_impl<T>(t * v.e[0], t * v.e[1], t * v.e[2]);
 }
 template <class T>
 inline Vec3_impl<T> operator*(const Vec3_impl<T> &v, double t) {
