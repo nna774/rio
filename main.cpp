@@ -56,7 +56,7 @@ int main() {
     for (int i = 0; i < image_width; ++i) {
       Color pixel_color(0, 0, 0);
       std::array<Color, samples_per_pixel> arr;
-#pragma omp parallel for
+// pragma omp parallel for
       for (int s = 0; s < samples_per_pixel; ++s) {
         auto u = (i + random_float()) / (image_width - 1);
         auto v = (j + random_float()) / (image_height - 1);
