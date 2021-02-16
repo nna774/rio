@@ -24,10 +24,12 @@ std::optional<Float> hit_sphere(const Point3& center, Float radius,
   return (-harf_b - std::sqrt(discriminant)) / a;
 }
 
-Color ray_color(const Ray& r, const Hittable& world) {
+Color ray_color(const Ray& r, const Hittable& world, int depth) {
+  if (depth <= 0) return Color(0, 0, 0);
   HitRecord rec;
-  if (world.hit(r, 0, infinity, rec)) {
-    return 0.5 * (rec.normal + Color(1, 1, 1));
+  if (world.hit(r, 0.001, infinity, rec)) {
+    Point3 target = rec.p + rec.normal + random_unit_vector();
+    return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1);
   }
   Vec3 unit_direction = unit_vector(r.direction());
   auto t2 = 0.5 * (unit_direction.y() + 1.0);
@@ -40,11 +42,12 @@ int main() {
   const int image_width = 1000;
   const int image_height = static_cast<int>(image_width / aspect_ratio);
   const int samples_per_pixel = 100;
+  const int max_depth = 50;
 
   // World
   HittableList world;
   world.add(std::make_shared<Sphere>(Point3(0, 0, -1), 0.5));
-  world.add(std::make_shared<Sphere>(Point3(0, -100.5, -1), 100));
+  world.add(std::make_shared<Sphere>(Point3(0, -100.5, -1), 90));
 
   // Camera
   Camera camera;
@@ -56,12 +59,12 @@ int main() {
     for (int i = 0; i < image_width; ++i) {
       Color pixel_color(0, 0, 0);
       std::array<Color, samples_per_pixel> arr;
-// pragma omp parallel for
+      // pragma omp parallel for
       for (int s = 0; s < samples_per_pixel; ++s) {
         auto u = (i + random_float()) / (image_width - 1);
         auto v = (j + random_float()) / (image_height - 1);
         Ray r = camera.get_ray(u, v);
-        arr[s] = ray_color(r, world);
+        arr[s] = ray_color(r, world, max_depth);
       }
       pixel_color = std::accumulate(begin(arr), end(arr), Color{});
       write_color(std::cout, pixel_color, samples_per_pixel);

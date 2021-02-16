@@ -4,6 +4,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "utils.hpp"
+
 template <class T>
 class Vec3_impl {
  public:
@@ -34,6 +36,14 @@ class Vec3_impl {
 
   T length() const { return std::sqrt(length_squared()); }
   T length_squared() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
+
+  inline static Vec3_impl random() {
+    return Vec3_impl(random_float(), random_float(), random_float());
+  }
+  inline static Vec3_impl random(Float min, Float max) {
+    return Vec3_impl(random_float(min, max), random_float(min, max),
+                random_float(min, max));
+  }
 
  public:
   T e[3];
@@ -84,8 +94,22 @@ inline Vec3_impl<T> unit_vector(Vec3_impl<T> v) {
   return v / v.length();
 }
 
-using Float = double;
+template <class T>
+Vec3_impl<T> random_in_unit_sphere_impl() {
+  while (true) {
+    auto p = Vec3_impl<T>::random(-1, 1);
+    if (p.length_squared() >= 1) continue;
+    return p;
+  }
+}
+template <class T>
+Vec3_impl<T> random_unit_vector_impl() {
+    return unit_vector(random_in_unit_sphere_impl<T>());
+}
+
 using Vec3 = Vec3_impl<Float>;
+auto random_in_unit_sphere = random_in_unit_sphere_impl<Float>;
+auto random_unit_vector = random_unit_vector_impl<Float>;
 
 // Type aliases for Vec3
 using Point3 = Vec3;  // 3D point

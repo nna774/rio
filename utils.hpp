@@ -4,7 +4,7 @@
 #include <numbers>
 #include <random>
 
-#include "vec3.hpp"
+using Float = double;
 
 const Float infinity = std::numeric_limits<Float>::infinity();
 const Float pi = std::numbers::pi_v<Float>;
