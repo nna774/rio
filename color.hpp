@@ -5,11 +5,20 @@
 
 #include "vec3.hpp"
 
-void write_color(std::ostream &fs, Color color) {
+void write_color(std::ostream &fs, Color color, int samples_per_pixel) {
+  auto r = color.x();
+  auto g = color.y();
+  auto b = color.z();
+  // Divide the color by the number of samples.
+  auto scale = 1.0 / samples_per_pixel;
+  r *= scale;
+  g *= scale;
+  b *= scale;
+
   // Write the translated [0,255] value of each color component.
-  fs << static_cast<int>(255.999 * color.x()) << ' '
-     << static_cast<int>(255.999 * color.y()) << ' '
-     << static_cast<int>(255.999 * color.z()) << '\n';
+  fs << static_cast<int>(256 * std::clamp<Float>(r, 0, 0.999)) << ' '
+     << static_cast<int>(256 * std::clamp<Float>(g, 0, 0.999)) << ' '
+     << static_cast<int>(256 * std::clamp<Float>(b, 0, 0.999)) << '\n';
 }
 
 #endif
