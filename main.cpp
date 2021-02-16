@@ -1,19 +1,38 @@
 #include <iostream>
+#include <optional>
 
 #include "color.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
 
+std::optional<Float> hit_sphere(const Point3& center, Float radius,
+                                const Ray& r) {
+  Vec3 oc = r.origin() - center;
+  auto a = r.direction().length_squared();
+  auto harf_b = dot(oc, r.direction());
+  auto c = oc.length_squared() - radius * radius;
+  auto discriminant = harf_b * harf_b - a * c;
+  if (discriminant < 0) {
+    return std::nullopt;
+  }
+  return (-harf_b - std::sqrt(discriminant)) / a;
+}
+
 Color ray_color(const Ray& r) {
+  auto t = hit_sphere(Point3(0, 0, -1), 0.5, r);
+  if (t) {
+    Vec3 N = unit_vector(r.at(*t) - Vec3(0, 0, -1));
+    return 0.5 * Color(N.x() + 1, N.y() + 1, N.z() + 1);
+  }
   Vec3 unit_direction = unit_vector(r.direction());
-  auto t = 0.5 * (unit_direction.y() + 1.0);
-  return (1.0 - t) * Color{1.0, 1.0, 1.0} + t * Color{0.5, 0.7, 1.0};
+  auto t2 = 0.5 * (unit_direction.y() + 1.0);
+  return (1.0 - t2) * Color{1.0, 1.0, 1.0} + t2 * Color{0.5, 0.7, 1.0};
 }
 
 int main() {
   // Image
   const auto aspect_ratio = 16.0 / 9.0;
-  const int image_width = 400;
+  const int image_width = 4000;
   const int image_height = static_cast<int>(image_width / aspect_ratio);
 
   // Camera
